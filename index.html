@@ -1,0 +1,557 @@
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg0: #0e0f11;
+  --bg1: #161719;
+  --bg2: #1e2023;
+  --bg3: #26292e;
+  --bg4: #2e3238;
+  --border: rgba(255,255,255,0.08);
+  --border-med: rgba(255,255,255,0.14);
+  --border-hi: rgba(255,255,255,0.22);
+  --text-primary: #e8eaed;
+  --text-secondary: #8b9099;
+  --text-muted: #555c66;
+  --accent-blue: #4a9eff;
+  --accent-blue-dim: rgba(74,158,255,0.15);
+  --accent-green: #4caf7d;
+  --accent-green-dim: rgba(76,175,125,0.15);
+  --accent-purple: #9b7fe8;
+  --accent-purple-dim: rgba(155,127,232,0.15);
+  --accent-amber: #f0a742;
+  --accent-amber-dim: rgba(240,167,66,0.15);
+  --accent-red: #e8635a;
+  --accent-red-dim: rgba(232,99,90,0.15);
+  --accent-yellow: #d4b84a;
+  --font: 'CMG Sans','Montserrat',sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+}
+body { background: var(--bg0); color: var(--text-primary); font-family: var(--font); }
+#app { padding: 20px 16px 40px; max-width: 900px; margin: 0 auto; }
+
+/* ── Header ── */
+.page-header { text-align: center; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 0.5px solid var(--border); }
+.page-header h1 { font-size: 20px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-primary); }
+.page-header p { font-size: 11px; font-weight: 500; color: var(--text-muted); letter-spacing: 0.14em; text-transform: uppercase; margin-top: 5px; }
+.header-meta { display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 10px; }
+.status-pill { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text-muted); font-family: var(--mono); }
+.status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-green); box-shadow: 0 0 6px var(--accent-green); }
+.updated-label { font-size: 11px; color: var(--text-muted); font-family: var(--mono); }
+
+/* ── Legend ── */
+.legend { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-bottom: 16px; }
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 600; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; }
+.legend-dot { width: 8px; height: 8px; border-radius: 1px; }
+
+/* ── Floor plan ── */
+.floor-plan { background: var(--bg1); border: 0.5px solid var(--border-med); border-radius: 10px; overflow: hidden; margin-bottom: 12px; }
+.box-btn { cursor: pointer; }
+.box-btn rect { transition: opacity 0.12s; }
+.box-btn:hover rect { opacity: 0.75; }
+.box-btn.active rect { stroke-width: 2 !important; filter: brightness(1.3); }
+
+/* ── Map detail panel ── */
+#detail-panel { border: 0.5px solid var(--border-med); border-radius: 10px; background: var(--bg1); overflow: hidden; margin-bottom: 32px; }
+.detail-header { padding: 12px 16px; border-bottom: 0.5px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: var(--bg2); }
+.detail-title { font-size: 14px; font-weight: 700; color: var(--text-primary); letter-spacing: 0.04em; font-family: var(--mono); }
+.detail-subtitle { font-size: 11px; color: var(--text-muted); margin-top: 2px; letter-spacing: 0.06em; text-transform: uppercase; }
+.close-btn { background: none; border: 0.5px solid var(--border-med); border-radius: 6px; padding: 4px 10px; font-size: 11px; font-weight: 600; color: var(--text-muted); cursor: pointer; font-family: var(--font); letter-spacing: 0.04em; }
+.close-btn:hover { background: var(--bg3); color: var(--text-primary); }
+.connections-grid { padding: 12px 16px; }
+.section-label { font-size: 9px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.12em; margin: 12px 0 6px; }
+.section-label:first-child { margin-top: 0; }
+.conn-row { display: flex; flex-wrap: wrap; gap: 4px; }
+.conn-tag { font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 4px; font-family: var(--mono); }
+.conn-tag.red    { background: var(--accent-red-dim);    color: var(--accent-red);    border: 0.5px solid rgba(232,99,90,0.3); }
+.conn-tag.blue   { background: var(--accent-blue-dim);   color: var(--accent-blue);   border: 0.5px solid rgba(74,158,255,0.3); }
+.conn-tag.green  { background: var(--accent-green-dim);  color: var(--accent-green);  border: 0.5px solid rgba(76,175,125,0.3); }
+.conn-tag.amber  { background: var(--accent-amber-dim);  color: var(--accent-amber);  border: 0.5px solid rgba(240,167,66,0.3); }
+.conn-tag.purple { background: var(--accent-purple-dim); color: var(--accent-purple); border: 0.5px solid rgba(155,127,232,0.3); }
+.empty-state { padding: 28px 16px; text-align: center; color: var(--text-muted); font-size: 12px; letter-spacing: 0.04em; }
+
+/* ── Search bar ── */
+.search-wrap { position: relative; margin-bottom: 12px; }
+.search-wrap svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); opacity: 0.4; pointer-events: none; }
+#search { width: 100%; background: var(--bg2); border: 0.5px solid var(--border-med); border-radius: 8px; padding: 9px 12px 9px 36px; font-size: 13px; color: var(--text-primary); font-family: var(--mono); outline: none; transition: border-color 0.15s; }
+#search::placeholder { color: var(--text-muted); }
+#search:focus { border-color: var(--accent-blue); }
+.search-count { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 11px; color: var(--text-muted); font-family: var(--mono); }
+
+/* ── Accordion ── */
+.section-heading { font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 0.5px solid var(--border); }
+.accordion { display: flex; flex-direction: column; gap: 4px; }
+.acc-item { border: 0.5px solid var(--border); border-radius: 8px; overflow: hidden; background: var(--bg1); transition: border-color 0.15s; }
+.acc-item:hover { border-color: var(--border-med); }
+.acc-item.open { border-color: var(--border-med); }
+.acc-item.hidden { display: none; }
+
+/* left border by type */
+.acc-item.type-wb   { border-left: 2px solid var(--accent-blue); }
+.acc-item.type-fbst { border-left: 2px solid var(--accent-purple); }
+.acc-item.type-fb   { border-left: 2px solid var(--accent-green); }
+.acc-item.type-foh  { border-left: 2px solid var(--accent-red); }
+
+.acc-trigger { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: none; border: none; cursor: pointer; text-align: left; }
+.acc-trigger:hover { background: var(--bg2); }
+.acc-left { display: flex; align-items: center; gap: 10px; }
+.acc-name { font-size: 13px; font-weight: 700; color: var(--text-primary); font-family: var(--mono); letter-spacing: 0.02em; }
+.acc-badge { font-size: 9px; font-weight: 600; padding: 2px 7px; border-radius: 3px; text-transform: uppercase; letter-spacing: 0.08em; }
+.acc-badge.type-wb   { background: var(--accent-blue-dim);   color: var(--accent-blue); }
+.acc-badge.type-fbst { background: var(--accent-purple-dim); color: var(--accent-purple); }
+.acc-badge.type-fb   { background: var(--accent-green-dim);  color: var(--accent-green); }
+.acc-badge.type-foh  { background: var(--accent-red-dim);    color: var(--accent-red); }
+.acc-sublabel { font-size: 11px; color: var(--text-muted); }
+.acc-right { display: flex; align-items: center; gap: 10px; }
+.acc-count { font-size: 10px; color: var(--text-muted); font-family: var(--mono); }
+.acc-chevron { font-size: 10px; color: var(--text-muted); transition: transform 0.2s; }
+.acc-item.open .acc-chevron { transform: rotate(180deg); }
+.acc-body { display: none; border-top: 0.5px solid var(--border); }
+.acc-item.open .acc-body { display: block; }
+
+/* Connection rows */
+.conn-line { display: flex; align-items: center; gap: 10px; padding: 7px 14px; border-bottom: 0.5px solid var(--border); transition: background 0.1s; }
+.conn-line:last-child { border-bottom: none; }
+.conn-line:hover { background: var(--bg2); }
+.conn-line.highlight { background: rgba(74,158,255,0.07); }
+.conn-port { font-size: 12px; font-weight: 500; color: var(--text-primary); font-family: var(--mono); min-width: 120px; }
+.conn-port mark { background: rgba(74,158,255,0.3); color: var(--accent-blue); border-radius: 2px; padding: 0 1px; }
+.conn-dest { flex: 1; font-size: 12px; color: var(--text-muted); font-style: italic; font-family: var(--mono); }
+.conn-dest.filled { color: var(--accent-green); font-style: normal; }
+.edit-btn { font-size: 10px; font-weight: 600; padding: 3px 9px; border: 0.5px solid var(--border-med); border-radius: 4px; background: none; cursor: pointer; color: var(--text-muted); white-space: nowrap; font-family: var(--font); letter-spacing: 0.04em; transition: all 0.12s; }
+.edit-btn:hover { background: var(--bg3); color: var(--text-primary); border-color: var(--border-hi); }
+
+/* ── Modal ── */
+.modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
+.modal-backdrop.open { display: flex; }
+.modal { background: var(--bg2); border: 0.5px solid var(--border-med); border-radius: 10px; padding: 20px; width: 90%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
+.modal-eyebrow { font-size: 9px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 4px; }
+.modal h3 { font-size: 15px; font-weight: 700; color: var(--text-primary); font-family: var(--mono); margin-bottom: 12px; }
+.modal label { font-size: 10px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; display: block; margin-bottom: 6px; }
+.modal textarea { width: 100%; background: var(--bg3); border: 0.5px solid var(--border-med); border-radius: 6px; padding: 10px 12px; font-size: 13px; font-family: var(--mono); color: var(--text-primary); resize: vertical; min-height: 80px; outline: none; transition: border-color 0.15s; }
+.modal textarea:focus { border-color: var(--accent-blue); }
+.modal textarea::placeholder { color: var(--text-muted); }
+.modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
+.modal-actions button { padding: 7px 18px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: var(--font); letter-spacing: 0.04em; transition: all 0.12s; }
+.btn-cancel { background: none; border: 0.5px solid var(--border-med); color: var(--text-muted); }
+.btn-cancel:hover { background: var(--bg3); color: var(--text-primary); }
+.btn-save { background: var(--accent-blue); border: none; color: #fff; }
+.btn-save:hover { filter: brightness(1.1); }
+
+/* ── Print styles ── */
+@media print {
+  body { background: #fff; color: #000; }
+  .floor-plan, #detail-panel, .modal-backdrop { display: none; }
+  .acc-item { border-left-color: #999 !important; break-inside: avoid; }
+  .acc-body { display: block !important; }
+  .edit-btn, .acc-chevron { display: none; }
+  .conn-dest { color: #333 !important; font-style: normal !important; }
+  .acc-name { color: #000; }
+  .acc-badge { border: 1px solid #ccc; color: #444 !important; background: #f5f5f5 !important; }
+}
+</style>
+
+<div id="app">
+
+  <!-- Header -->
+  <div class="page-header">
+    <h1>The Life Church</h1>
+    <p>Memphis Auditorium — Box Connection Reference</p>
+    <div class="header-meta">
+      <div class="status-pill"><span class="status-dot"></span>Live Reference</div>
+      <div class="updated-label" id="updated-label">Last edited: never</div>
+      <button class="close-btn" onclick="window.print()" style="font-size:10px;padding:3px 10px;">⎙ Print</button>
+    </div>
+  </div>
+
+  <!-- Legend -->
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#d4b84a"></div>Wall box (WB)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#9b7fe8"></div>Stage floor box</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#4caf7d"></div>Floor box (FB)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#e8635a"></div>FOH booth</div>
+  </div>
+
+  <!-- Floor plan -->
+  <div class="floor-plan">
+  <svg width="100%" viewBox="0 0 680 560" style="display:block">
+    <!-- Room -->
+    <path d="M 140,18 L 560,18 L 620,60 L 648,130 L 648,420 L 610,465 L 530,490 L 150,490 L 70,465 L 32,420 L 32,130 L 60,60 Z" fill="#161719" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+    <!-- Grid lines subtle -->
+    <line x1="340" y1="18" x2="340" y2="490" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
+    <line x1="32" y1="255" x2="648" y2="255" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
+    <!-- Stage -->
+    <path d="M 175,22 L 530,22 L 555,55 L 555,185 L 510,215 L 390,225 L 320,225 L 200,215 L 155,185 L 155,55 Z" fill="rgba(155,127,232,0.08)" stroke="rgba(155,127,232,0.4)" stroke-width="0.8"/>
+    <text x="355" y="125" text-anchor="middle" font-size="13" font-weight="700" fill="rgba(155,127,232,0.7)" font-family="'CMG Sans','Montserrat',sans-serif" letter-spacing="4">STAGE</text>
+    <!-- FOH area -->
+    <rect x="258" y="358" width="204" height="54" rx="6" fill="rgba(232,99,90,0.07)" stroke="rgba(232,99,90,0.35)" stroke-width="0.8"/>
+    <text x="360" y="378" text-anchor="middle" font-size="10" font-weight="700" fill="rgba(232,99,90,0.7)" font-family="'CMG Sans','Montserrat',sans-serif" letter-spacing="3">FOH</text>
+    <!-- Auditorium label -->
+    <text x="360" y="308" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.08)" font-family="'CMG Sans','Montserrat',sans-serif" letter-spacing="4">AUDITORIUM</text>
+
+    <!-- WB4-01 -->
+    <g class="box-btn" id="btn-WB4-01" onclick="showBox('WB4-01')"><rect x="148" y="22" width="68" height="28" rx="3" fill="#1e1c0a" stroke="#d4b84a" stroke-width="0.8"/><text x="182" y="40" text-anchor="middle" font-size="9" font-weight="700" fill="#d4b84a" font-family="'JetBrains Mono','Montserrat',sans-serif" letter-spacing="0.5">WB4-01</text></g>
+    <!-- WB3-07 -->
+    <g class="box-btn" id="btn-WB3-07" onclick="showBox('WB3-07')"><rect x="466" y="22" width="68" height="28" rx="3" fill="#1e1c0a" stroke="#d4b84a" stroke-width="0.8"/><text x="500" y="40" text-anchor="middle" font-size="9" font-weight="700" fill="#d4b84a" font-family="'JetBrains Mono','Montserrat',sans-serif" letter-spacing="0.5">WB3-07</text></g>
+    <!-- WB2-01 -->
+    <g class="box-btn" id="btn-WB2-01" onclick="showBox('WB2-01')"><rect x="38" y="148" width="62" height="26" rx="3" fill="#081828" stroke="#4a9eff" stroke-width="0.8"/><text x="69" y="165" text-anchor="middle" font-size="9" font-weight="700" fill="#4a9eff" font-family="'JetBrains Mono','Montserrat',sans-serif">WB2-01</text></g>
+    <!-- WB2-02 -->
+    <g class="box-btn" id="btn-WB2-02" onclick="showBox('WB2-02')"><rect x="580" y="148" width="62" height="26" rx="3" fill="#081828" stroke="#4a9eff" stroke-width="0.8"/><text x="611" y="165" text-anchor="middle" font-size="9" font-weight="700" fill="#4a9eff" font-family="'JetBrains Mono','Montserrat',sans-serif">WB2-02</text></g>
+    <!-- WB6-01 -->
+    <g class="box-btn" id="btn-WB6-01" onclick="showBox('WB6-01')"><rect x="120" y="355" width="62" height="26" rx="3" fill="#081828" stroke="#4a9eff" stroke-width="0.8"/><text x="151" y="372" text-anchor="middle" font-size="9" font-weight="700" fill="#4a9eff" font-family="'JetBrains Mono','Montserrat',sans-serif">WB6-01</text></g>
+    <!-- WB6-02 -->
+    <g class="box-btn" id="btn-WB6-02" onclick="showBox('WB6-02')"><rect x="498" y="355" width="62" height="26" rx="3" fill="#081828" stroke="#4a9eff" stroke-width="0.8"/><text x="529" y="372" text-anchor="middle" font-size="9" font-weight="700" fill="#4a9eff" font-family="'JetBrains Mono','Montserrat',sans-serif">WB6-02</text></g>
+    <!-- WB2-07 -->
+    <g class="box-btn" id="btn-WB2-07" onclick="showBox('WB2-07')"><rect x="38" y="385" width="62" height="26" rx="3" fill="#081828" stroke="#4a9eff" stroke-width="0.8"/><text x="69" y="402" text-anchor="middle" font-size="9" font-weight="700" fill="#4a9eff" font-family="'JetBrains Mono','Montserrat',sans-serif">WB2-07</text></g>
+    <!-- WB3-11 -->
+    <g class="box-btn" id="btn-WB3-11" onclick="showBox('WB3-11')"><rect x="326" y="468" width="68" height="28" rx="3" fill="#081828" stroke="#4a9eff" stroke-width="0.8"/><text x="360" y="480" text-anchor="middle" font-size="9" font-weight="700" fill="#4a9eff" font-family="'JetBrains Mono','Montserrat',sans-serif">WB3-11</text><text x="360" y="492" text-anchor="middle" font-size="8" fill="rgba(74,158,255,0.6)" font-family="'JetBrains Mono','Montserrat',sans-serif">CAM PLATFORM</text></g>
+
+    <!-- Stage FBs (purple) -->
+    <g class="box-btn" id="btn-FB1-05" onclick="showBox('FB1-05')"><rect x="216" y="58" width="52" height="24" rx="3" fill="#110e1e" stroke="#9b7fe8" stroke-width="0.8"/><text x="242" y="74" text-anchor="middle" font-size="9" font-weight="700" fill="#9b7fe8" font-family="'JetBrains Mono','Montserrat',sans-serif">FB1-05</text></g>
+    <g class="box-btn" id="btn-FB1-06" onclick="showBox('FB1-06')"><rect x="428" y="58" width="52" height="24" rx="3" fill="#110e1e" stroke="#9b7fe8" stroke-width="0.8"/><text x="454" y="74" text-anchor="middle" font-size="9" font-weight="700" fill="#9b7fe8" font-family="'JetBrains Mono','Montserrat',sans-serif">FB1-06</text></g>
+    <g class="box-btn" id="btn-FB1-01" onclick="showBox('FB1-01')"><rect x="183" y="156" width="52" height="24" rx="3" fill="#110e1e" stroke="#9b7fe8" stroke-width="0.8"/><text x="209" y="172" text-anchor="middle" font-size="9" font-weight="700" fill="#9b7fe8" font-family="'JetBrains Mono','Montserrat',sans-serif">FB1-01</text></g>
+    <g class="box-btn" id="btn-FB1-02" onclick="showBox('FB1-02')"><rect x="263" y="183" width="52" height="24" rx="3" fill="#110e1e" stroke="#9b7fe8" stroke-width="0.8"/><text x="289" y="199" text-anchor="middle" font-size="9" font-weight="700" fill="#9b7fe8" font-family="'JetBrains Mono','Montserrat',sans-serif">FB1-02</text></g>
+    <g class="box-btn" id="btn-FB1-03" onclick="showBox('FB1-03')"><rect x="381" y="183" width="52" height="24" rx="3" fill="#110e1e" stroke="#9b7fe8" stroke-width="0.8"/><text x="407" y="199" text-anchor="middle" font-size="9" font-weight="700" fill="#9b7fe8" font-family="'JetBrains Mono','Montserrat',sans-serif">FB1-03</text></g>
+    <g class="box-btn" id="btn-FB1-04" onclick="showBox('FB1-04')"><rect x="455" y="156" width="52" height="24" rx="3" fill="#110e1e" stroke="#9b7fe8" stroke-width="0.8"/><text x="481" y="172" text-anchor="middle" font-size="9" font-weight="700" fill="#9b7fe8" font-family="'JetBrains Mono','Montserrat',sans-serif">FB1-04</text></g>
+
+    <!-- Auditorium FBs (green) -->
+    <g class="box-btn" id="btn-FB2-01" onclick="showBox('FB2-01')"><rect x="148" y="223" width="52" height="24" rx="3" fill="#0a1610" stroke="#4caf7d" stroke-width="0.8"/><text x="174" y="239" text-anchor="middle" font-size="9" font-weight="700" fill="#4caf7d" font-family="'JetBrains Mono','Montserrat',sans-serif">FB2-01</text></g>
+    <g class="box-btn" id="btn-FB2-02" onclick="showBox('FB2-02')"><rect x="500" y="223" width="52" height="24" rx="3" fill="#0a1610" stroke="#4caf7d" stroke-width="0.8"/><text x="526" y="239" text-anchor="middle" font-size="9" font-weight="700" fill="#4caf7d" font-family="'JetBrains Mono','Montserrat',sans-serif">FB2-02</text></g>
+    <g class="box-btn" id="btn-FB2-03" onclick="showBox('FB2-03')"><rect x="72" y="238" width="52" height="24" rx="3" fill="#0a1610" stroke="#4caf7d" stroke-width="0.8"/><text x="98" y="254" text-anchor="middle" font-size="9" font-weight="700" fill="#4caf7d" font-family="'JetBrains Mono','Montserrat',sans-serif">FB2-03</text></g>
+    <g class="box-btn" id="btn-FB2-04" onclick="showBox('FB2-04')"><rect x="576" y="238" width="52" height="24" rx="3" fill="#0a1610" stroke="#4caf7d" stroke-width="0.8"/><text x="602" y="254" text-anchor="middle" font-size="9" font-weight="700" fill="#4caf7d" font-family="'JetBrains Mono','Montserrat',sans-serif">FB2-04</text></g>
+
+    <!-- FOH booths -->
+    <g class="box-btn" id="btn-FOH-L" onclick="showBox('FOH-L')"><rect x="264" y="368" width="56" height="28" rx="3" fill="#1a0c0b" stroke="#e8635a" stroke-width="0.8"/><text x="292" y="380" text-anchor="middle" font-size="9" font-weight="700" fill="#e8635a" font-family="'JetBrains Mono','Montserrat',sans-serif">FOH-L</text><text x="292" y="391" text-anchor="middle" font-size="7" fill="rgba(232,99,90,0.6)" font-family="'JetBrains Mono','Montserrat',sans-serif">LEFT</text></g>
+    <g class="box-btn" id="btn-FOH-M" onclick="showBox('FOH-M')"><rect x="332" y="368" width="56" height="28" rx="3" fill="#1a0c0b" stroke="#e8635a" stroke-width="0.8"/><text x="360" y="380" text-anchor="middle" font-size="9" font-weight="700" fill="#e8635a" font-family="'JetBrains Mono','Montserrat',sans-serif">FOH-M</text><text x="360" y="391" text-anchor="middle" font-size="7" fill="rgba(232,99,90,0.6)" font-family="'JetBrains Mono','Montserrat',sans-serif">MIDDLE</text></g>
+    <g class="box-btn" id="btn-FOH-R" onclick="showBox('FOH-R')"><rect x="400" y="368" width="56" height="28" rx="3" fill="#1a0c0b" stroke="#e8635a" stroke-width="0.8"/><text x="428" y="380" text-anchor="middle" font-size="9" font-weight="700" fill="#e8635a" font-family="'JetBrains Mono','Montserrat',sans-serif">FOH-R</text><text x="428" y="391" text-anchor="middle" font-size="7" fill="rgba(232,99,90,0.6)" font-family="'JetBrains Mono','Montserrat',sans-serif">RIGHT</text></g>
+  </svg>
+  </div>
+
+  <!-- Map detail panel -->
+  <div id="detail-panel">
+    <div class="empty-state">Select a box on the map to inspect its connections</div>
+  </div>
+
+  <!-- Connection Reference -->
+  <div style="margin-top:36px">
+    <div class="section-heading">Connection Reference</div>
+
+    <!-- Search -->
+    <div class="search-wrap">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="6.5" cy="6.5" r="4.5" stroke="white" stroke-width="1.2"/><line x1="10" y1="10" x2="14" y2="14" stroke="white" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <input type="text" id="search" placeholder="Search port or box name…" oninput="onSearch(this.value)"/>
+      <span class="search-count" id="search-count"></span>
+    </div>
+
+    <div class="accordion" id="accordion"></div>
+    <div id="no-results" style="display:none;text-align:center;padding:24px;color:var(--text-muted);font-size:12px;font-family:var(--mono)">No matching ports found</div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-backdrop" id="modal">
+  <div class="modal">
+    <div class="modal-eyebrow" id="modal-box-name"></div>
+    <h3 id="modal-title"></h3>
+    <label for="modal-input">Connected to</label>
+    <textarea id="modal-input" placeholder="e.g. ATEM Input 1 · Rack B, Row 3…"></textarea>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-save" onclick="saveModal()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var boxes = {
+  'WB4-01': { name:'WB4-01', label:'Stage Left', type:'Wall Box', typeKey:'wb', sections:[
+    {label:'Audio tie lines',color:'blue',items:['ATIE 39','ATIE 40','ATIE 41','ATIE 42','ATIE 43','ATIE 44','ATIE 45','ATIE 46','ATIE 47','ATIE 48','ATIE 49','ATIE 50','ATIE 51','ATIE 52','ATIE 53','ATIE 54','ATIE 55','ATIE 56','ATIE 57','ATIE 58','ATIE 59','ATIE 60','ATIE 61','ATIE 62','ATIE 63','ATIE 64']},
+    {label:'Comm outputs',color:'purple',items:['Comm Out 1','Comm Out 2','Comm Out 3','Comm Out 4']},
+    {label:'Data tie lines',color:'amber',items:['DTIE 21','DTIE 22','DTIE 23','DTIE 24','DTIE 25','DTIE 26','DTIE 27','DTIE 28','DTIE 29','DTIE 30','DTIE 31','DTIE 32','DTIE 33','DTIE 34','DTIE 35','DTIE 36','DTIE 37']},
+    {label:'Video tie lines',color:'green',items:['VTIE 9','VTIE 10','VTIE 11','VTIE 12','VTIE 13','VTIE 14']},
+    {label:'Fiber (MM)',color:'blue',items:['Fiber MM 1','Fiber MM 2','Fiber MM 3','Fiber MM 4','Fiber MM 5','Fiber MM 6','MM 1','MM 2','MM 3','MM 4']},
+    {label:'Fiber (SM)',color:'blue',items:['Fiber SM 13','Fiber SM 14','Fiber SM 15','Fiber SM 16','Fiber SM 17','Fiber SM 18']},
+    {label:'RF / Audio',color:'red',items:['RFstage Ant A','RFstage Ant B','RFaud Ant A','RFaud Ant B','MADI 1','NPU','PC 1','Elec. Room']},
+    {label:'Stage racks',color:'purple',items:['Stage Rack — Shure IEM & Axient','Stage Rack 2 — NPU, Adiom, Sound Grid Server']}
+  ]},
+  'WB3-07': { name:'WB3-07', label:'Stage Right', type:'Wall Box', typeKey:'wb', sections:[
+    {label:'Multi-mode fiber',color:'blue',items:['MM 19','MM 20','MM 21','MM 22','MM 23','MM 24','MM 25']},
+    {label:'Data tie lines',color:'amber',items:['DTIE 39','DTIE 40','DTIE 41','DTIE 42','DTIE 43','DTIE 44','DTIE 45']},
+    {label:'Video tie lines',color:'green',items:['VTIE 15','VTIE 16','VTIE 17','VTIE 18']},
+    {label:'Comm outputs',color:'purple',items:['Comm Out 1','Comm Out 2','Comm Out 3','Comm Out 4']},
+    {label:'Audio tie lines',color:'blue',items:['ATIE 65','ATIE 66','ATIE 67','ATIE 68','ATIE 69','ATIE 70','ATIE 71','ATIE 72','ATIE 73','ATIE 74','ATIE 75','ATIE 76','ATIE 77','ATIE 78','ATIE 79','ATIE 80','ATIE 81','ATIE 82','ATIE 83','ATIE 84']}
+  ]},
+  'WB2-01': { name:'WB2-01', label:'Left Wall Upper', type:'Wall Box', typeKey:'wb', sections:[
+    {label:'Camera',color:'green',items:['Cam 8','Time Code 8','GenLock 8','CamTie 8']},
+    {label:'Control',color:'blue',items:['Control 9','Control 10']},
+    {label:'Data tie lines',color:'amber',items:['DTIE 92','DTIE 93']},
+    {label:'Audio tie lines',color:'blue',items:['ATIE 123','ATIE 124']},
+    {label:'Comm outputs',color:'purple',items:['Comm Out 9']}
+  ]},
+  'WB2-02': { name:'WB2-02', label:'Right Wall Upper', type:'Wall Box', typeKey:'wb', sections:[
+    {label:'Camera',color:'green',items:['Cam 9','Timecode 9','GenLock 9','CamTie 9']},
+    {label:'Control',color:'blue',items:['Control 11','Control 12']},
+    {label:'Data tie lines',color:'amber',items:['DTIE 94','DTIE 95']},
+    {label:'Audio tie lines',color:'blue',items:['ATIE 125','ATIE 126']},
+    {label:'Comm outputs',color:'purple',items:['Comm Out 9']}
+  ]},
+  'WB6-01': { name:'WB6-01', label:'Left Wall Mid', type:'Wall Box', typeKey:'wb', sections:[
+    {label:'Camera',color:'green',items:['Cam 5','Time Code 5','Gen Lock 5','Cam Tie 5']},
+    {label:'Control',color:'blue',items:['Control 5']},
+    {label:'Data tie lines',color:'amber',items:['DTIE 58']},
+    {label:'Audio tie lines',color:'blue',items:['ATIE 97','ATIE 98']},
+    {label:'Comm outputs',color:'purple',items:['Comm Out 7']}
+  ]},
+  'WB6-02': { name:'WB6-02', label:'Right Wall Mid', type:'Wall Box', typeKey:'wb', sections:[
+    {label:'Camera',color:'green',items:['Cam 6','Time Code 6','Genlock 6','CamTie 6']},
+    {label:'Control',color:'blue',items:['Control 6']},
+    {label:'Data tie lines',color:'amber',items:['DTIE 59']},
+    {label:'Audio tie lines',color:'blue',items:['ATIE 99','ATIE 100']},
+    {label:'Comm outputs',color:'purple',items:['Comm Out 7']}
+  ]},
+  'WB2-07': { name:'WB2-07', label:'Left Wall Lower', type:'Wall Box', typeKey:'wb', sections:[
+    {label:'Camera',color:'green',items:['Cam 10','Timecode 10','Genlock 10','Cam Tie 10']},
+    {label:'Control',color:'blue',items:['Control 13','Control 14']},
+    {label:'Data tie lines',color:'amber',items:['DTIE 96','DTIE 97']},
+    {label:'Audio tie lines',color:'blue',items:['ATIE 127','ATIE 128']},
+    {label:'Comm outputs',color:'purple',items:['Comm Out 9']}
+  ]},
+  'WB3-11': { name:'WB3-11', label:'Camera Platform', type:'Wall Box', typeKey:'wb', sections:[
+    {label:'Camera',color:'green',items:['Cam 7','Time Code 7','CamTie 7']},
+    {label:'Control',color:'blue',items:['Control 7','Control 8']},
+    {label:'Video tie lines',color:'green',items:['VTIE 7','VTIE 19','VTIE 20','VTIE 21','VTIE 22']},
+    {label:'Data tie lines',color:'amber',items:['DTIE 60','DTIE 61','DTIE 62','DTIE 63','DTIE 64','DTIE 65','DTIE 66','DTIE 67']},
+    {label:'Audio tie lines',color:'blue',items:['ATIE 101','ATIE 102','ATIE 103','ATIE 104','ATIE 105','ATIE 106']},
+    {label:'Comm outputs',color:'purple',items:['Comm Out 8','Comm Out 9']}
+  ]},
+  'FB1-01': { name:'FB1-01', label:'Stage Left Lip', type:'Stage Floor Box', typeKey:'fbst', sections:[
+    {label:'Microphones',color:'red',items:['MIC 1','MIC 2','MIC 3','MIC 4','MIC 5','MIC 6','MIC 7','MIC 8']},
+    {label:'Audio tie lines',color:'blue',items:['ATIE 1','ATIE 2','ATIE 3','ATIE 4']},
+    {label:'Data tie lines',color:'amber',items:['DTIE 1','DTIE 2','DTIE 3']},
+    {label:'Video tie lines',color:'green',items:['VTIE 1']},
+    {label:'Monitor / comms',color:'purple',items:['MON 1','MON 2','TL 1','TL 2']},
+    {label:'Power',color:'amber',items:['Power 1','Power 2']}
+  ]},
+  'FB1-02': { name:'FB1-02', label:'Stage Centre-Left', type:'Stage Floor Box', typeKey:'fbst', sections:[
+    {label:'Microphones',color:'red',items:['MIC 33','MIC 34','MIC 35','MIC 36','MIC 37','MIC 38','MIC 39','MIC 40']},
+    {label:'Video tie lines',color:'green',items:['VTIE 2','VTIE 4']},
+    {label:'Data tie lines',color:'amber',items:['DTIE 13','DTIE 14']},
+    {label:'Power',color:'amber',items:['Power 1','Power 2']}
+  ]},
+  'FB1-03': { name:'FB1-03', label:'Stage Centre-Right', type:'Stage Floor Box', typeKey:'fbst', sections:[
+    {label:'Stage floor mics',color:'red',items:['Shot Stage Floor L (MIC 19)','AMB Stage Floor L (MIC 20)','MIC 21','MIC 22','MIC 23','MIC 24']},
+    {label:'Audio tie lines',color:'blue',items:['ATIE 9','ATIE 10','ATIE 11','ATIE 12']},
+    {label:'Monitor / comms',color:'purple',items:['MON 5','MON 6','TL 5','TL 6']},
+    {label:'Video tie lines',color:'green',items:['VTIE 3']},
+    {label:'Data tie lines',color:'amber',items:['DTIE 7','DTIE 8','DTIE 9']},
+    {label:'Power',color:'amber',items:['Power 1','Power 2']}
+  ]},
+  'FB1-04': { name:'FB1-04', label:'Stage Right Lip', type:'Stage Floor Box', typeKey:'fbst', sections:[
+    {label:'Microphones',color:'red',items:['MIC 25','MIC 26','MIC 27','MIC 28','MIC 29','MIC 30','MIC 31','MIC 32']},
+    {label:'Audio tie lines',color:'blue',items:['ATIE 13','ATIE 14','ATIE 15','ATIE 16']},
+    {label:'Monitor / comms',color:'purple',items:['MON 7','MON 8','TL 7','TL 8']},
+    {label:'Video tie lines',color:'green',items:['VTIE 4']},
+    {label:'Data tie lines',color:'amber',items:['DTIE 10','DTIE 11','DTIE 12']},
+    {label:'Power',color:'amber',items:['Power 1','Power 2']}
+  ]},
+  'FB1-05': { name:'FB1-05', label:'Stage Upper Left', type:'Stage Floor Box', typeKey:'fbst', sections:[
+    {label:'Microphones',color:'red',items:['MIC 33','MIC 34','MIC 35','MIC 36','MIC 37','MIC 38','MIC 39','MIC 40']},
+    {label:'Video tie lines',color:'green',items:['VTIE 5','VTIE 6']},
+    {label:'Data tie lines',color:'amber',items:['DTIE 13','DTIE 14','DTIE 15','DTIE 16']},
+    {label:'Guitars',color:'amber',items:['GTR 1','GTR 2','GTR 3','GTR 4','GTR 5','GTR 6']},
+    {label:'Power',color:'amber',items:['Power 1','Power 2']}
+  ]},
+  'FB1-06': { name:'FB1-06', label:'Stage Upper Right', type:'Stage Floor Box', typeKey:'fbst', sections:[
+    {label:'Guitars',color:'amber',items:['GTR 7','GTR 8','GTR 9','GTR 10','GTR 11','GTR 12']},
+    {label:'Microphones',color:'red',items:['MIC 41','MIC 42','MIC 43','MIC 44','MIC 45','MIC 46','MIC 47','MIC 48']},
+    {label:'Video tie lines',color:'green',items:['VTIE 7','VTIE 8']},
+    {label:'Data tie lines',color:'amber',items:['DTIE 17','DTIE 18','DTIE 19','DTIE 20']},
+    {label:'Power',color:'amber',items:['Power 1','Power 2']}
+  ]},
+  'FB2-01': { name:'FB2-01', label:'Left of Stage', type:'Floor Box', typeKey:'fb', sections:[
+    {label:'Camera',color:'green',items:['Cam 1','TimeCode 1','GenLock 1']},
+    {label:'Control',color:'blue',items:['Control 1']},
+    {label:'Data tie lines',color:'amber',items:['DTIE 46','DTIE 47','DTIE 48']},
+    {label:'Cam Tie (active)',color:'red',items:['Cam Tie 1']},
+    {label:'Audio tie lines',color:'blue',items:['ATIE 85','ATIE 86']},
+    {label:'Comm outputs',color:'purple',items:['Comm Out 7']},
+    {label:'Power',color:'amber',items:['Power 1','Power 2']}
+  ]},
+  'FB2-02': { name:'FB2-02', label:'Right of Stage', type:'Floor Box', typeKey:'fb', sections:[
+    {label:'Camera',color:'green',items:['Cam 2','Timecode 2','Genlock 2']},
+    {label:'Control',color:'blue',items:['Control 2']},
+    {label:'Data tie lines',color:'amber',items:['DTIE 49','DTIE 50','DTIE 51']},
+    {label:'Cam Tie (active)',color:'red',items:['Camtie 2']},
+    {label:'Audio tie lines',color:'blue',items:['ATIE 87','ATIE 88']},
+    {label:'Comm outputs',color:'purple',items:['Comm Out 7']},
+    {label:'Power',color:'amber',items:['Power 1','Power 2']}
+  ]},
+  'FB2-03': { name:'FB2-03', label:'Mid Left', type:'Floor Box', typeKey:'fb', sections:[
+    {label:'Camera',color:'green',items:['Cam 3','Timecode 3','GenLock 3']},
+    {label:'Control',color:'blue',items:['Control 3']},
+    {label:'Data tie lines',color:'amber',items:['DTIE 52','DTIE 53','DTIE 54']},
+    {label:'Cam Tie (active)',color:'red',items:['CamTie 3']},
+    {label:'Audio tie lines',color:'blue',items:['ATIE 89','ATIE 90','ATIE 91','ATIE 92']},
+    {label:'Comm outputs',color:'purple',items:['Comm Out 7']},
+    {label:'Power',color:'amber',items:['Power 1','Power 2']}
+  ]},
+  'FB2-04': { name:'FB2-04', label:'Mid Right', type:'Floor Box', typeKey:'fb', sections:[
+    {label:'Camera',color:'green',items:['CAM 4','Timecode 4','Genlock 4']},
+    {label:'Control',color:'blue',items:['Control 4']},
+    {label:'Data tie lines',color:'amber',items:['DTIE 55','DTIE 56','DTIE 57']},
+    {label:'Cam Tie (active)',color:'red',items:['Cam Tie 4']},
+    {label:'Audio tie lines',color:'blue',items:['ATIE 93','ATIE 94','ATIE 95','ATIE 96']},
+    {label:'Comm outputs',color:'purple',items:['Comm Out 7']},
+    {label:'Power',color:'amber',items:['Power 1','Power 2']}
+  ]},
+  'FOH-L': { name:'FOH Left', label:'FOH Booth', type:'FOH Position', typeKey:'foh', sections:[
+    {label:'Multi-mode fiber',color:'blue',items:['MM 13','MM 14','MM 15','MM 16','MM 17','MM 18']},
+    {label:'Single-mode fiber',color:'blue',items:['SM 1','SM 2','SM 3','SM 4','SM 5','SM 6']},
+    {label:'Data tie lines',color:'amber',items:['DTIE 68','DTIE 69','DTIE 70','DTIE 71','DTIE 72','DTIE 73']},
+    {label:'Video tie lines',color:'green',items:['VTIE 23','VTIE 24','VTIE 25','VTIE 26','VTIE 27','VTIE 28']},
+    {label:'Comm outputs',color:'purple',items:['Comm Out 1','Comm Out 2','Comm Out 3','Comm Out 4']},
+    {label:'To WB3-11',color:'blue',items:['DTIE 66','DTIE 67','VTIE 21','VTIE 22','ATIE 105','ATIE 106']}
+  ]},
+  'FOH-M': { name:'FOH Middle', label:'FOH Booth', type:'FOH Position', typeKey:'foh', sections:[
+    {label:'To WB4-01 (Stage Left)',color:'blue',items:['DTIE 32','DTIE 33','DTIE 34','DTIE 35','DTIE 36','DTIE 37','ATIE 59','ATIE 60','ATIE 61','ATIE 62','ATIE 63','ATIE 64']},
+    {label:'Video tie lines',color:'green',items:['VTIE 12','VTIE 13','VTIE 14','VTIE 15','VTIE 16','VTIE 17','VTIE 29','VTIE 30','VTIE 31','VTIE 32','VTIE 33','VTIE 34']},
+    {label:'Data tie lines',color:'amber',items:['DTIE 74','DTIE 75','DTIE 76','DTIE 77','DTIE 78','DTIE 79']},
+    {label:'Comm outputs',color:'purple',items:['Comm Out 1','Comm Out 2','Comm Out 3','Comm Out 4']},
+    {label:'Electric room',color:'amber',items:['LN-1','LN-2','DMX A','DMX B']}
+  ]},
+  'FOH-R': { name:'FOH Right', label:'FOH Booth', type:'FOH Position', typeKey:'foh', sections:[
+    {label:'Multi-mode fiber',color:'blue',items:['MM 19','MM 20','MM 21','MM 22','MM 23','MM 24','MM 7','MM 8','MM 9','MM 10']},
+    {label:'Single-mode fiber',color:'blue',items:['SM 7','SM 8','SM 9','SM 10','SM 11']},
+    {label:'Audio tie lines',color:'blue',items:['ATIE 107','ATIE 108','ATIE 109','ATIE 110','ATIE 111','ATIE 112','ATIE 113','ATIE 114','ATIE 115','ATIE 116','ATIE 117','ATIE 118','ATIE 119','ATIE 120','ATIE 121','ATIE 122']},
+    {label:'Comm outputs',color:'purple',items:['Comm Out 1','Comm Out 2','Comm Out 3','Comm Out 4']},
+    {label:'Data tie lines',color:'amber',items:['DTIE 80','DTIE 81','DTIE 82','DTIE 83','DTIE 84','DTIE 85','DTIE 86','DTIE 87','DTIE 88','DTIE 89','DTIE 90','DTIE 91']}
+  ]}
+};
+
+var typeLabels = { wb:'Wall Box', fbst:'Stage FB', fb:'Floor Box', foh:'FOH' };
+var destinations = {};
+try { destinations = JSON.parse(localStorage.getItem('tlc_dest') || '{}'); } catch(e){}
+function saveDest(){ try{ localStorage.setItem('tlc_dest', JSON.stringify(destinations)); }catch(e){} }
+function destKey(b,p){ return b+'||'+p; }
+function safeId(k){ return k.replace(/[^a-z0-9]/gi,'_'); }
+
+function updateTimestamp(){
+  var t = localStorage.getItem('tlc_updated');
+  document.getElementById('updated-label').textContent = t ? 'Last edited: '+t : 'Last edited: never';
+}
+updateTimestamp();
+
+/* ── Map panel ── */
+var activeBox = null;
+function showBox(id){
+  if(activeBox){ var p=document.getElementById('btn-'+activeBox); if(p) p.classList.remove('active'); }
+  activeBox=id;
+  var btn=document.getElementById('btn-'+id); if(btn) btn.classList.add('active');
+  var d=boxes[id], panel=document.getElementById('detail-panel');
+  var html='<div class="detail-header"><div><p class="detail-title">'+d.name+(d.label?' — '+d.label:'')+'</p><p class="detail-subtitle">'+d.type+'</p></div><button class="close-btn" onclick="closePanel()">✕ Close</button></div><div class="connections-grid">';
+  d.sections.forEach(function(s){
+    html+='<p class="section-label">'+s.label+'</p><div class="conn-row">';
+    s.items.forEach(function(i){ html+='<span class="conn-tag '+s.color+'">'+i+'</span>'; });
+    html+='</div>';
+  });
+  html+='</div>';
+  panel.innerHTML=html;
+}
+function closePanel(){
+  if(activeBox){ var p=document.getElementById('btn-'+activeBox); if(p) p.classList.remove('active'); activeBox=null; }
+  document.getElementById('detail-panel').innerHTML='<div class="empty-state">Select a box on the map to inspect its connections</div>';
+}
+
+/* ── Accordion ── */
+function allPorts(id){
+  var ports=[]; boxes[id].sections.forEach(function(s){ s.items.forEach(function(i){ ports.push(i); }); });
+  return ports;
+}
+function buildAccordion(){
+  var acc=document.getElementById('accordion'); acc.innerHTML='';
+  Object.keys(boxes).forEach(function(id){
+    var d=boxes[id], ports=allPorts(id);
+    var filled=ports.filter(function(p){ return destinations[destKey(id,p)]; }).length;
+    var item=document.createElement('div');
+    item.className='acc-item type-'+d.typeKey;
+    item.id='acc-'+id;
+    item.innerHTML='<button class="acc-trigger" onclick="toggleAcc(\''+id+'\')"><div class="acc-left"><span class="acc-name">'+d.name+'</span><span class="acc-badge type-'+d.typeKey+'">'+typeLabels[d.typeKey]+'</span><span class="acc-sublabel">'+d.label+'</span></div><div class="acc-right"><span class="acc-count" id="count-'+id+'">'+filled+'/'+ports.length+' assigned</span><span class="acc-chevron">▼</span></div></button><div class="acc-body" id="acc-body-'+id+'">'+renderBody(id,ports,'')+'</div>';
+    acc.appendChild(item);
+  });
+}
+function renderBody(id, ports, q){
+  var html='';
+  ports.forEach(function(port){
+    var k=destKey(id,port), dest=destinations[k]||'', sid=safeId(k);
+    var portHtml = q ? port.replace(new RegExp('('+q+')','gi'),'<mark>$1</mark>') : port;
+    html+='<div class="conn-line" id="line-'+sid+'">';
+    html+='<span class="conn-port">'+portHtml+'</span>';
+    html+='<span class="conn-dest'+(dest?' filled':'')+'" id="dest-'+sid+'">'+(dest||'— not assigned')+'</span>';
+    html+='<button class="edit-btn" onclick="openModal(\''+id+'\',\''+port.replace(/\\/g,'\\\\').replace(/'/g,"\\'")+'\')">'+(dest?'Edit':'+ Add')+'</button>';
+    html+='</div>';
+  });
+  return html;
+}
+function toggleAcc(id){ document.getElementById('acc-'+id).classList.toggle('open'); }
+
+/* ── Search ── */
+function onSearch(q){
+  q = q.trim().toLowerCase();
+  var total=0, shown=0;
+  Object.keys(boxes).forEach(function(id){
+    var ports=allPorts(id);
+    total+=ports.length;
+    if(!q){
+      document.getElementById('acc-'+id).classList.remove('hidden');
+      document.getElementById('acc-body-'+id).innerHTML=renderBody(id,ports,'');
+      shown+=ports.length;
+      return;
+    }
+    var matched=ports.filter(function(p){ return p.toLowerCase().indexOf(q)>=0 || id.toLowerCase().indexOf(q)>=0 || boxes[id].name.toLowerCase().indexOf(q)>=0; });
+    if(matched.length===0){
+      document.getElementById('acc-'+id).classList.add('hidden');
+    } else {
+      document.getElementById('acc-'+id).classList.remove('hidden');
+      document.getElementById('acc-'+id).classList.add('open');
+      document.getElementById('acc-body-'+id).innerHTML=renderBody(id,matched,q);
+      shown+=matched.length;
+    }
+  });
+  var countEl=document.getElementById('search-count');
+  var noRes=document.getElementById('no-results');
+  if(q){ countEl.textContent=shown+' result'+(shown!==1?'s':''); }
+  else { countEl.textContent=''; }
+  noRes.style.display=(shown===0&&q)?'block':'none';
+}
+
+/* ── Modal ── */
+var _mb=null,_mp=null;
+function openModal(boxId,port){
+  _mb=boxId; _mp=port;
+  document.getElementById('modal-box-name').textContent=boxes[boxId].name+(boxes[boxId].label?' — '+boxes[boxId].label:'');
+  document.getElementById('modal-title').textContent=port;
+  document.getElementById('modal-input').value=destinations[destKey(boxId,port)]||'';
+  document.getElementById('modal').classList.add('open');
+  setTimeout(function(){ document.getElementById('modal-input').focus(); },50);
+}
+function closeModal(){ document.getElementById('modal').classList.remove('open'); _mb=null; _mp=null; }
+function saveModal(){
+  if(!_mb||!_mp) return;
+  var k=destKey(_mb,_mp), val=document.getElementById('modal-input').value.trim(), sid=safeId(k);
+  if(val){ destinations[k]=val; } else { delete destinations[k]; }
+  saveDest();
+  var now=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  localStorage.setItem('tlc_updated',now);
+  updateTimestamp();
+  var destEl=document.getElementById('dest-'+sid);
+  var btnEl=destEl?destEl.nextElementSibling:null;
+  if(destEl){ destEl.textContent=val||'— not assigned'; destEl.className='conn-dest'+(val?' filled':''); }
+  if(btnEl){ btnEl.textContent=val?'Edit':'+ Add'; }
+  var ports=allPorts(_mb);
+  var filled=ports.filter(function(p){ return destinations[destKey(_mb,p)]; }).length;
+  var cEl=document.getElementById('count-'+_mb); if(cEl) cEl.textContent=filled+'/'+ports.length+' assigned';
+  closeModal();
+}
+document.getElementById('modal').addEventListener('click',function(e){ if(e.target===this) closeModal(); });
+buildAccordion();
+</script>
