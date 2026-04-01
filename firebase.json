@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "site": "hsl-wall-boxes",
     "public": ".",
     "ignore": [
       "firebase.json",
