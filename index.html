@@ -205,13 +205,13 @@ body { background: var(--bg0); color: var(--text-primary); font-family: var(--fo
   <div id="auth-loading">
     <div class="auth-kicker">The Life Church</div>
     <div class="auth-title">Checking access…</div>
-    <p class="auth-copy">This tool is limited to approved <strong>@life.church</strong> accounts.</p>
+    <p class="auth-copy">This tool is limited to approved <strong>@thelifechurch.com</strong> accounts.</p>
   </div>
 
   <div id="auth-gate" hidden>
     <div class="auth-kicker">Internal Access</div>
     <div class="auth-title">Sign in to open the box reference</div>
-    <p class="auth-copy">Use your Google Workspace account. The app will only unlock for <strong>@life.church</strong> users.</p>
+    <p class="auth-copy">Use your Google Workspace account. The app will only unlock for <strong>@thelifechurch.com</strong> users.</p>
     <div class="auth-actions">
       <button class="auth-btn primary" id="login-btn" type="button">Sign in with Google</button>
     </div>
@@ -340,12 +340,12 @@ body { background: var(--bg0); color: var(--text-primary); font-family: var(--fo
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script>
-var allowedDomain = 'life.church';
+var allowedDomain = 'thelifechurch.com';
 var firebaseConfig = {
-  apiKey: 'REPLACE_ME',
-  authDomain: 'REPLACE_ME.firebaseapp.com',
-  projectId: 'REPLACE_ME',
-  appId: 'REPLACE_ME'
+  apiKey: 'AIzaSyAdnlsADdi0iSXmV8umMiuI0IHUl0w7Ygs',
+  authDomain: 'tlc-production-apps-2026.firebaseapp.com',
+  projectId: 'tlc-production-apps-2026',
+  appId: '1:220653467764:web:4dfd599dc82b5fe5627921'
 };
 
 var authReady = false;
@@ -372,10 +372,10 @@ function setView(view) {
 }
 
 function isFirebaseConfigured() {
-  return firebaseConfig.apiKey !== 'REPLACE_ME' &&
-    firebaseConfig.authDomain !== 'REPLACE_ME.firebaseapp.com' &&
-    firebaseConfig.projectId !== 'REPLACE_ME' &&
-    firebaseConfig.appId !== 'REPLACE_ME';
+  return !!(firebaseConfig.apiKey &&
+    firebaseConfig.authDomain &&
+    firebaseConfig.projectId &&
+    firebaseConfig.appId);
 }
 
 function initAuth() {
