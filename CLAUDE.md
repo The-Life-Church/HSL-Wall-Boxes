@@ -14,9 +14,9 @@ No build system, package manager, or dependencies. Open `index.html` directly in
 
 - Treat `main` as the only active branch. Do not recreate or rely on a `stage` branch unless the user explicitly asks for it.
 - This repo deploys automatically to Firebase Hosting from GitHub Actions on pushes to `main`.
-- The live public app URL is `https://hsl-wall-boxes.web.app`.
-- The Firebase project ID is `tlc-production-apps-2026`.
-- The Firebase Hosting site target in `firebase.json` is `hsl-wall-boxes`. Keep workflow config aligned with that site if Hosting settings change.
+- The live public app URL is `https://tlc-wall-boxes.web.app`.
+- The Firebase project ID is `the-life-church-apps`.
+- The Firebase Hosting site target in `firebase.json` is `tlc-wall-boxes`. Keep workflow config aligned with that site if Hosting settings change.
 - The repo remote is `https://github.com/The-Life-Church/HSL-Wall-Boxes.git`. If the repository name changes again, update the local `origin` URL and confirm the GitHub Actions still point at the correct repo.
 - Firebase Auth is enabled for Google sign-in and currently restricted in `index.html` to approved `@thelifechurch.com` users. Be careful when editing auth-domain checks because both Firebase Auth config and client-side checks affect access.
 - The Firebase web app config is embedded directly in `index.html`. Do not replace it with placeholders unless the user explicitly wants to disconnect the deployed app.
